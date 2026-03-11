@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taja(na) — UX/UI Design & Digital Products</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ─── RESET & BASE ─────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink:     #0d0d0d;
+    --cream:   #f5f0e8;
+    --warm:    #ebe4d5;
+    --accent:  #c8502a;
+    --gold:    #d4a853;
+    --muted:   #8a7f74;
+    --border:  rgba(13,13,13,0.12);
+
+    --font-display: 'Playfair Display', serif;
+    --font-body:    'Syne', sans-serif;
+    --font-mono:    'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ─── CUSTOM CURSOR ─────────────────────────────────────── */
+  #cursor {
+    position: fixed; top: 0; left: 0; z-index: 9999;
+    width: 12px; height: 12px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: width .2s, height .2s, background .2s;
+    mix-blend-mode: multiply;
+  }
+  #cursor-ring {
+    position: fixed; top: 0; left: 0; z-index: 9998;
+    width: 40px; height: 40px;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: transform .12s ease, width .25s, height .25s;
+  }
+  body:has(a:hover) #cursor, body:has(button:hover) #cursor { width: 20px; height: 20px; }
+  body:has(a:hover) #cursor-ring, body:has(button:hover) #cursor-ring { width: 60px; height: 60px; }
+
+  /* ─── NAV ────────────────────────────────────────────────── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.4rem 4rem;
+    background: rgba(245,240,232,0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    transition: padding .3s;
+  }
+  nav.shrunk { padding: .9rem 4rem; }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 3rem; list-style: none; }
+  .nav-links a {
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    position: relative;
+    padding-bottom: .2rem;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0;
+    width: 0; height: 1.5px;
+    background: var(--accent);
+    transition: width .3s ease;
+  }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* ─── HERO ───────────────────────────────────────────────── */
+  #hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 0 4rem;
+    gap: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Background grain texture */
+  #hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 70% 50%, rgba(212,168,83,.10) 0%, transparent 70%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  .hero-left { position: relative; z-index: 1; }
+
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: .75rem;
+    letter-spacing: .2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1.4rem;
+    opacity: 0;
+    animation: fadeUp .7s .2s forwards;
+  }
+
+  .hero-name {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 7vw, 6.5rem);
+    font-weight: 900;
+    line-height: .95;
+    letter-spacing: -.04em;
+    margin-bottom: 1.8rem;
+    opacity: 0;
+    animation: fadeUp .7s .4s forwards;
+  }
+  .hero-name em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-role {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp .7s .55s forwards;
+  }
+
+  .hero-tagline {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-style: italic;
+    line-height: 1.55;
+    max-width: 44ch;
+    margin-bottom: 2.5rem;
+    color: #3a3530;
+    opacity: 0;
+    animation: fadeUp .7s .7s forwards;
+  }
+
+  .usp-row {
+    display: flex; flex-wrap: wrap; gap: .7rem;
+    opacity: 0;
+    animation: fadeUp .7s .85s forwards;
+  }
+  .usp-tag {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    letter-spacing: .1em;
+    padding: .45rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .usp-tag strong { color: var(--accent); font-weight: 500; }
+
+  /* Hero right — animated orb / portrait placeholder */
+  .hero-right {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeIn 1.2s .5s forwards;
+  }
+
+
+  /* ─── PORTRAIT ───────────────────────────────────────────── */
+  .portrait-wrap {
+    position: relative;
+    width: min(420px, 44vw);
+    margin-left: auto;
+  }
+  .portrait-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 2px;
+    filter: contrast(1.05);
+    position: relative;
+    z-index: 1;
+    animation: fadeIn 1s .5s forwards;
+    opacity: 0;
+  }
+  .portrait-accent {
+    position: absolute;
+    bottom: -18px;
+    right: -18px;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--accent);
+    border-radius: 2px;
+    z-index: 0;
+    animation: fadeIn 1s .8s forwards;
+    opacity: 0;
+  }
+
+  @keyframes morphRing {
+    0%   { border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%; }
+    33%  { border-radius: 45% 55% 40% 60% / 60% 40% 55% 45%; }
+    66%  { border-radius: 55% 45% 60% 40% / 45% 55% 40% 60%; }
+    100% { border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%; }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* scroll indicator */
+  .scroll-hint {
+    position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: .5rem;
+    font-family: var(--font-mono); font-size: .65rem; letter-spacing: .15em;
+    color: var(--muted); text-transform: uppercase;
+    animation: fadeIn 1s 1.5s forwards; opacity: 0;
+  }
+  .scroll-line {
+    width: 1px; height: 50px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    animation: scrollDrop 1.8s ease-in-out infinite;
+  }
+  @keyframes scrollDrop {
+    0%   { transform: scaleY(0); transform-origin: top; opacity: 1; }
+    50%  { transform: scaleY(1); transform-origin: top; }
+    100% { transform: scaleY(0); transform-origin: bottom; opacity: 0; }
+  }
+
+  /* ─── SECTION SHARED ──────────────────────────────────── */
+  section {
+    padding: 8rem 4rem;
+    position: relative;
+  }
+  section:nth-child(even) { background: var(--warm); }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1rem;
+  }
+  .section-heading {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -.03em;
+    margin-bottom: 3.5rem;
+  }
+  .section-heading em { font-style: italic; color: var(--accent); }
+
+  /* reveal animation */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── ÜBER MICH ─────────────────────────────────────── */
+  #ueber-mich .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 6rem;
+    align-items: start;
+  }
+
+  .bio-text {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: #3a3530;
+  }
+  .bio-text p + p { margin-top: 1.4rem; }
+
+  .quote-block {
+    border-left: 3px solid var(--accent);
+    padding-left: 1.8rem;
+    margin: 2.5rem 0;
+  }
+  .quote-block p {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.15rem;
+    line-height: 1.65;
+    color: #2a2520;
+  }
+
+  /* timeline-style facts */
+  .facts-col { display: flex; flex-direction: column; gap: 1.5rem; }
+  .fact-card {
+    padding: 1.5rem 1.8rem;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: transform .3s, box-shadow .3s;
+  }
+  .fact-card::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--gold);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform .4s ease;
+  }
+  .fact-card:hover::before { transform: scaleY(1); }
+  .fact-card:hover { transform: translateX(6px); box-shadow: -4px 4px 20px rgba(0,0,0,.07); }
+  .fact-label {
+    font-family: var(--font-mono);
+    font-size: .65rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: .5rem;
+  }
+  .fact-value {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+
+  /* ─── SKILLS ─────────────────────────────────────────── */
+  #skills .skills-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2.5rem;
+  }
+
+  .skill-block {
+    padding: 2.5rem 2rem;
+    border: 1px solid var(--border);
+    background: white;
+    position: relative;
+    overflow: hidden;
+    transition: transform .35s, box-shadow .35s;
+  }
+  .skill-block:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,.09); }
+
+  .skill-block-accent {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .5s ease;
+  }
+  .skill-block:hover .skill-block-accent { transform: scaleX(1); }
+
+  .skill-block-title {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  /* soft skills as tags */
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .skill-tag {
+    display: inline-flex;
+    font-size: .82rem;
+    font-weight: 600;
+    padding: .4rem .9rem;
+    border-radius: 2px;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    transition: background .25s, color .25s, transform .2s;
+  }
+  .skill-tag:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    transform: scale(1.05);
+  }
+
+  /* process steps */
+  .process-list { display: flex; flex-direction: column; gap: 1.2rem; }
+  .process-step {
+    display: flex; align-items: flex-start; gap: 1rem;
+  }
+  .step-num {
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    color: var(--accent);
+    min-width: 2rem;
+    padding-top: .15rem;
+  }
+  .step-text { font-size: .9rem; line-height: 1.6; }
+
+  /* strengths / weaknesses */
+  .sw-list { display: flex; flex-direction: column; gap: .8rem; }
+  .sw-item {
+    display: flex; align-items: flex-start; gap: .8rem;
+    font-size: .88rem; line-height: 1.55;
+  }
+  .sw-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: .15rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .65rem; font-weight: 700;
+  }
+  .sw-icon.strength { background: rgba(212,168,83,.2); color: #9a6c1a; }
+  .sw-icon.weakness { background: rgba(200,80,42,.12); color: var(--accent); }
+
+  .sw-divider {
+    font-family: var(--font-mono);
+    font-size: .65rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 1.2rem 0 .8rem;
+    display: flex; align-items: center; gap: .8rem;
+  }
+  .sw-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ─── PROJEKTE ───────────────────────────────────────── */
+  #projekte { background: var(--ink); color: var(--cream); }
+  #projekte .section-label { color: var(--gold); }
+  #projekte .section-heading { color: var(--cream); }
+  #projekte .section-heading em { color: var(--gold); }
+
+  .project-card {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 5rem;
+    align-items: start;
+    padding: 4rem 0;
+    border-top: 1px solid rgba(255,255,255,.1);
+    position: relative;
+  }
+  .project-card:last-child { border-bottom: 1px solid rgba(255,255,255,.1); }
+
+  .project-meta {}
+  .project-num {
+    font-family: var(--font-display);
+    font-size: 5rem;
+    font-weight: 900;
+    font-style: italic;
+    color: rgba(255,255,255,.05);
+    line-height: 1;
+    margin-bottom: .5rem;
+  }
+  .project-category {
+    font-family: var(--font-mono);
+    font-size: .65rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: .8rem;
+  }
+  .project-title {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  .project-year {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    color: rgba(245,240,232,.35);
+    letter-spacing: .1em;
+  }
+
+  .project-body {}
+  .project-desc {
+    font-size: .95rem;
+    line-height: 1.75;
+    color: rgba(245,240,232,.75);
+    margin-bottom: 2rem;
+  }
+
+  .project-goals { display: flex; flex-direction: column; gap: .8rem; }
+  .goal-item {
+    display: flex; align-items: flex-start; gap: .9rem;
+    font-size: .87rem;
+    color: rgba(245,240,232,.7);
+    line-height: 1.55;
+  }
+  .goal-bullet {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+    margin-top: .45rem;
+  }
+
+  .project-tags {
+    display: flex; flex-wrap: wrap; gap: .5rem;
+    margin-top: 2rem;
+  }
+  .project-tag {
+    font-family: var(--font-mono);
+    font-size: .65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: .35rem .8rem;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 2px;
+    color: rgba(245,240,232,.5);
+    transition: border-color .2s, color .2s;
+  }
+  .project-tag:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* deliverables grid */
+  .deliverables-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.08);
+    margin-top: 2.5rem;
+  }
+  .deliverable {
+    padding: 1.4rem 1.2rem;
+    background: rgba(255,255,255,.03);
+    transition: background .25s;
+  }
+  .deliverable:hover { background: rgba(255,255,255,.07); }
+  .deliverable-icon {
+    font-size: 1.3rem;
+    margin-bottom: .5rem;
+  }
+  .deliverable-name {
+    font-family: var(--font-mono);
+    font-size: .65rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,.45);
+  }
+
+  /* ─── FOOTER ─────────────────────────────────────────── */
+  footer {
+    background: var(--ink);
+    color: rgba(245,240,232,.4);
+    padding: 3rem 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,.06);
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .1em;
+  }
+  footer .footer-logo {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(245,240,232,.6);
+  }
+  footer .footer-logo span { color: var(--gold); }
+
+  /* ─── HARD SKILLS ────────────────────────────────────────── */
+  .hard-skills-wrap {
+    border-top: 1px solid var(--border);
+    padding-top: 3rem;
+  }
+  .hard-skills-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .hard-skill-item {
+    background: white;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .9rem;
+    text-align: center;
+    transition: background .25s, transform .25s;
+    cursor: default;
+  }
+  .hard-skill-item:hover {
+    background: var(--ink);
+    transform: translateY(-4px);
+  }
+  .hard-skill-item:hover .hs-icon { color: var(--gold); }
+  .hard-skill-item:hover .hs-label { color: var(--cream); }
+  .hs-icon {
+    font-size: 1.4rem;
+    color: var(--accent);
+    transition: color .25s;
+    line-height: 1;
+    font-family: var(--font-mono);
+  }
+  .hs-label {
+    font-family: var(--font-mono);
+    font-size: .6rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color .25s;
+  }
+
+  /* ─── VISUAL PROOF ───────────────────────────────────────── */
+  .proof-wrap {
+    margin-top: 5rem;
+    padding-top: 4rem;
+    border-top: 1px solid rgba(255,255,255,.1);
+  }
+  .proof-intro-label {
+    font-family: var(--font-mono);
+    font-size: .7rem;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .proof-heading {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    color: var(--cream);
+    margin-bottom: 3.5rem;
+    line-height: 1.1;
+  }
+  .proof-heading em { font-style: italic; color: var(--gold); }
+
+  .proof-compare-group {
+    margin-bottom: 4.5rem;
+  }
+  .proof-group-label {
+    font-family: var(--font-mono);
+    font-size: .65rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,.3);
+    margin-bottom: 1.8rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .proof-group-label::after {
+    content: '';
+    flex: 1; height: 1px;
+    background: rgba(255,255,255,.08);
+  }
+
+  .proof-pair {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .proof-item {
+    position: relative;
+  }
+
+  .proof-badge {
+    display: inline-flex;
+    font-family: var(--font-mono);
+    font-size: .6rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    padding: .3rem .8rem;
+    border-radius: 2px;
+    margin-bottom: .8rem;
+  }
+  .proof-badge--before {
+    background: rgba(255,255,255,.08);
+    color: rgba(245,240,232,.45);
+    border: 1px solid rgba(255,255,255,.1);
+  }
+  .proof-badge--after {
+    background: rgba(212,168,83,.15);
+    color: var(--gold);
+    border: 1px solid rgba(212,168,83,.3);
+  }
+
+  .proof-img-wrap {
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 4px;
+    overflow: hidden;
+    background: rgba(255,255,255,.03);
+    position: relative;
+    max-height: 520px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212,168,83,.3) transparent;
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .proof-img-wrap:hover {
+    border-color: rgba(212,168,83,.35);
+    box-shadow: 0 0 30px rgba(212,168,83,.08);
+  }
+  .proof-img-wrap--wide {
+    max-height: 280px;
+  }
+  .proof-img-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .proof-caption {
+    font-family: var(--font-mono);
+    font-size: .62rem;
+    letter-spacing: .1em;
+    color: rgba(245,240,232,.3);
+    margin-top: .8rem;
+    line-height: 1.5;
+  }
+
+  .proof-divider-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .proof-divider-arrow {
+    font-size: 1.8rem;
+    color: var(--gold);
+    opacity: .5;
+    animation: pulseArrow 2s ease-in-out infinite;
+  }
+  @keyframes pulseArrow {
+    0%, 100% { opacity: .35; transform: translateX(0); }
+    50%       { opacity: .8;  transform: translateX(5px); }
+  }
+
+  @media (max-width: 960px) {
+    .proof-pair { grid-template-columns: 1fr; }
+    .proof-divider-line { transform: rotate(90deg); margin: .5rem auto; }
+  }
+
+  /* ─── RESPONSIVE ──────────────────────────────────────── */
+  @media (max-width: 960px) {
+    nav { padding: 1.2rem 2rem; }
+    .nav-links { gap: 2rem; }
+    #hero { grid-template-columns: 1fr; padding: 8rem 2rem 4rem; gap: 3rem; }
+    .hero-right { display: none; }
+    section { padding: 5rem 2rem; }
+    #ueber-mich .content-grid { grid-template-columns: 1fr; gap: 3rem; }
+    #skills .skills-layout { grid-template-columns: 1fr; }
+    .project-card { grid-template-columns: 1fr; gap: 2rem; }
+    .deliverables-grid { grid-template-columns: repeat(2, 1fr); }
+    .hard-skills-grid { grid-template-columns: repeat(3, 1fr); }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- ── NAVIGATION ──────────────────────────────────────────── -->
+<nav id="main-nav">
+  <div class="nav-logo">Taja<span>(na)</span></div>
+  <ul class="nav-links">
+    <li><a href="#ueber-mich">Über mich</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projekte">Projekte</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ───────────────────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-left">
+    <p class="hero-eyebrow">UX/UI Design &amp; Digital Strategy</p>
+    <h1 class="hero-name">Creative<br><em>Mind</em> &amp;<br>Tech Mind</h1>
+    <p class="hero-role">UX/UI Designerin · Digitale Problemlöserin</p>
+    <p class="hero-tagline">Ich entwickle digitale Produkte, die nicht nur gut aussehen — sondern messbar funktionieren.</p>
+    <div class="usp-row">
+      <span class="usp-tag"><strong>7+</strong> Jahre Erfahrung</span>
+      <span class="usp-tag">UX Strategy</span>
+      <span class="usp-tag">UI Systems</span>
+      <span class="usp-tag">Frontend Basics</span>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="portrait-wrap">
+      <img src="taja.png" alt="Taja(na)" class="portrait-img">
+      <div class="portrait-accent"></div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ── ÜBER MICH ──────────────────────────────────────────── -->
+<section id="ueber-mich">
+  <p class="section-label reveal">// 01 — Über mich</p>
+  <h2 class="section-heading reveal">Taja<em>(na)</em> —<br>Wer steckt dahinter?</h2>
+
+  <div class="content-grid">
+    <div class="reveal">
+      <div class="bio-text">
+        <p>Ich bin <strong>31 Jahre alt</strong>, in Kroatien geboren und lebe meine Kreativität sowohl im Code als auch im echten Leben voll aus.</p>
+
+        <div class="quote-block">
+          <p>„Wenn ich nicht gerade an High-End-UX/UI-Lösungen für Unternehmensplattformen feile, findet man mich beim Entwerfen aufwendiger Karnevalskostüme, beim Bemalen detailreicher Warhammer-Figuren oder beim Ausprobieren neuer Kunstprojekte."</p>
+        </div>
+
+        <p>Diesen Fokus und die Liebe zum Detail übertrage ich auch auf meinen Lifestyle: Als Ausgleich zur digitalen Welt bin ich leidenschaftlich gerne im Gym oder beim Wandern in der Natur unterwegs, während mich Reisen und Live-Konzerte immer wieder mit neuer Inspiration versorgen.</p>
+        <p>So starte ich jedes Projekt mit voller Energie, einem geschulten Auge für Ästhetik und frischen Ideen.</p>
+      </div>
+    </div>
+
+    <div class="facts-col reveal">
+      <div class="fact-card">
+        <p class="fact-label">Wohnort</p>
+        <p class="fact-value">Deutschland</p>
+      </div>
+      <div class="fact-card">
+        <p class="fact-label">Erfahrung</p>
+        <p class="fact-value">5+ Jahre UX/UI</p>
+      </div>
+      <div class="fact-card">
+        <p class="fact-label">Fokus</p>
+        <p class="fact-value">Software Tools &amp; Unternehmenswebseite</p>
+      </div>
+      <div class="fact-card">
+        <p class="fact-label">Spezialität</p>
+        <p class="fact-value">Design Systems &amp; UX Strategy</p>
+      </div>
+      <div class="fact-card">
+        <p class="fact-label">Leidenschaften</p>
+        <p class="fact-value">Kostüme · Reisen · Gym · Kunst</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SKILLS ─────────────────────────────────────────────── -->
+<section id="skills">
+  <p class="section-label reveal">// 02 — Skills</p>
+  <h2 class="section-heading reveal">Was ich <em>kann</em> —<br>und wie ich denke</h2>
+
+  <div class="skills-layout">
+
+    <!-- Soft Skills -->
+    <div class="skill-block reveal">
+      <div class="skill-block-accent"></div>
+      <p class="skill-block-title">Soft Skills</p>
+      <div class="tag-cloud">
+        <span class="skill-tag">Strategisch denkend</span>
+        <span class="skill-tag">Nutzerzentriert</span>
+        <span class="skill-tag">Analytisch</span>
+        <span class="skill-tag">Visuell stark</span>
+        <span class="skill-tag">Frontend/Dev Verständnis</span>
+        <span class="skill-tag">Growth Mindset</span>
+        <span class="skill-tag">Selbstmanagement</span>
+        <span class="skill-tag">Detailgenauigkeit</span>
+      </div>
+    </div>
+
+    <!-- Wie ich arbeite -->
+    <div class="skill-block reveal">
+      <div class="skill-block-accent"></div>
+      <p class="skill-block-title">Wie ich arbeite</p>
+      <div class="process-list">
+        <div class="process-step">
+          <span class="step-num">01</span>
+          <span class="step-text"><strong>Research first</strong> — Daten und Nutzerfeedback vor jeder Designentscheidung.</span>
+        </div>
+        <div class="process-step">
+          <span class="step-num">02</span>
+          <span class="step-text"><strong>Problem → Hypothese → Test</strong> — Iterativ, messbar, transparent.</span>
+        </div>
+        <div class="process-step">
+          <span class="step-num">03</span>
+          <span class="step-text"><strong>Daten- oder nutzerbasiert</strong> — Keine Design-Entscheidung ohne Grundlage.</span>
+        </div>
+        <div class="process-step">
+          <span class="step-num">04</span>
+          <span class="step-text"><strong>Timeboxing</strong> — Fokussiert und qualitätsbewusst priorisieren.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stärken & Schwächen -->
+    <div class="skill-block reveal">
+      <div class="skill-block-accent"></div>
+      <p class="skill-block-title">Stärken &amp; Schwächen</p>
+      <div class="sw-list">
+        <div class="sw-item">
+          <div class="sw-icon strength">✦</div>
+          <span>Systemisches Denken &amp; Informationsarchitektur</span>
+        </div>
+        <div class="sw-item">
+          <div class="sw-icon strength">✦</div>
+          <span>Usability Testing &amp; UI Consistency</span>
+        </div>
+        <div class="sw-item">
+          <div class="sw-icon strength">✦</div>
+          <span>Cross-Device Thinking</span>
+        </div>
+        <div class="sw-item">
+          <div class="sw-icon strength">✦</div>
+          <span>Kommunikation zwischen Tech &amp; Business</span>
+        </div>
+
+        <div class="sw-divider">Schwächen — offen kommuniziert</div>
+
+        <div class="sw-item">
+          <div class="sw-icon weakness">↻</div>
+          <span>Tendenz zum Über-Optimieren → aktiv durch Timeboxing im Griff.</span>
+        </div>
+        <div class="sw-item">
+          <div class="sw-icon weakness">↻</div>
+          <span>Hoher Qualitätsanspruch → bewusstes Priorisieren gelernt.</span>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Hard Skills -->
+  <div class="hard-skills-wrap reveal">
+    <p class="skill-block-title" style="margin-bottom:1.8rem; margin-top:3.5rem;">Hard Skills</p>
+    <div class="hard-skills-grid">
+      <div class="hard-skill-item">
+        <div class="hs-icon">⟨/⟩</div>
+        <div class="hs-label">Coding</div>
+      </div>
+      <div class="hard-skill-item">
+        <div class="hs-icon">◉</div>
+        <div class="hs-label">Branding</div>
+      </div>
+      <div class="hard-skill-item">
+        <div class="hs-icon">▶</div>
+        <div class="hs-label">Graphic &amp; Motion</div>
+      </div>
+      <div class="hard-skill-item">
+        <div class="hs-icon">◈</div>
+        <div class="hs-label">3D-Design</div>
+      </div>
+      <div class="hard-skill-item">
+        <div class="hs-icon">∿</div>
+        <div class="hs-label">SVG Animation</div>
+      </div>
+      <div class="hard-skill-item">
+        <div class="hs-icon">⬡</div>
+        <div class="hs-label">Frameworks / CMS</div>
+      </div>
+      <div class="hard-skill-item">
+        <div class="hs-icon">⚡</div>
+        <div class="hs-label">Performance</div>
+      </div>
+      <div class="hard-skill-item">
+        <div class="hs-icon">✓</div>
+        <div class="hs-label">Testing</div>
+      </div>
+      <div class="hard-skill-item">
+        <div class="hs-icon">▭</div>
+        <div class="hs-label">Frontend Development</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ── PROJEKTE ────────────────────────────────────────────── -->
+<section id="projekte">
+  <p class="section-label reveal">// 03 — Projekte</p>
+  <h2 class="section-heading reveal">Ausgewählte<br><em>Arbeiten</em></h2>
+
+  <!-- PROJECT 01 -->
+  <div class="project-card reveal">
+    <div class="project-meta">
+      <div class="project-num">01</div>
+      <p class="project-category">Website Redesign</p>
+      <h3 class="project-title">Re-Design<br>Webseite (FR)</h3>
+      <p class="project-year">Laufend · 2024–2025</p>
+    </div>
+
+    <div class="project-body">
+      <p class="project-desc">
+        Die bestehende Webseite war vier Jahre alt und benötigte einen grundlegenden optischen Refresh. Als Pilot wurde die <code style="font-family:var(--font-mono);font-size:.85em;color:var(--gold)">.fr</code>-Domain gewählt — mit wenigen Seiten und geringem Traffic bleibt potenzielle Fehlertoleranz auf Kundenseite minimal.
+      </p>
+
+      <div class="project-goals">
+        <div class="goal-item">
+          <div class="goal-bullet"></div>
+          <span><strong style="color:var(--cream)">Tailwind CSS</strong> als Grundstruktur implementieren, gemeinsam mit klaren HTML-Anweisungen für das Content Team.</span>
+        </div>
+        <div class="goal-item">
+          <div class="goal-bullet"></div>
+          <span><strong style="color:var(--cream)">Markdown-Integration</strong> damit das Content-Team unabhängig von HTML-Strukturen arbeiten kann.</span>
+        </div>
+        <div class="goal-item">
+          <div class="goal-bullet"></div>
+          <span><strong style="color:var(--cream)">WordPress-Migration</strong> — weg von WP hin zu einer schlanken, performanten Lösung.</span>
+        </div>
+        <div class="goal-item">
+          <div class="goal-bullet"></div>
+          <span>Kleineres CSS-Footprint &amp; messbar bessere <strong style="color:var(--cream)">Performance-Scores</strong>.</span>
+        </div>
+        <div class="goal-item">
+          <div class="goal-bullet"></div>
+          <span>Aufbau eines internen <strong style="color:var(--cream)">BOX-Systems</strong> als modulares Webseitenbaukasten-Framework.</span>
+        </div>
+      </div>
+
+      <div class="deliverables-grid">
+        <div class="deliverable">
+          <div class="deliverable-icon">⬡</div>
+          <div class="deliverable-name">Wireframing</div>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">◎</div>
+          <div class="deliverable-name">Prototyping</div>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">◈</div>
+          <div class="deliverable-name">Style Guide</div>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">≡</div>
+          <div class="deliverable-name">Navigations-System</div>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">▭</div>
+          <div class="deliverable-name">Desktop Webseite</div>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">▯</div>
+          <div class="deliverable-name">Mobile Version</div>
+        </div>
+
+      </div>
+
+      <div class="project-tags">
+        <span class="project-tag">Tailwind CSS</span>
+        <span class="project-tag">Markdown</span>
+        <span class="project-tag">UX Audit</span>
+        <span class="project-tag">Design System</span>
+        <span class="project-tag">Performance</span>
+        <span class="project-tag">BOX System</span>
+        <span class="project-tag">WordPress Migration</span>
+      </div>
+    </div>
+  </div>
+  <!-- /PROJECT 01 -->
+
+  <!-- PROJECT 02 -->
+  <div class="project-card reveal">
+    <div class="project-meta">
+      <div class="project-num">02</div>
+      <p class="project-category">Software · UI Redesign</p>
+      <h3 class="project-title">Toolbox<br>Re-Design</h3>
+      <p class="project-year">Laufend · 2024–2025</p>
+    </div>
+
+    <div class="project-body">
+      <p class="project-desc">
+        Die Toolbox ist das Herzstück und Hauptprodukt des Unternehmens — eine komplexe Softwareplattform mit tiefen Datenbankstrukturen, an der ein cross-funktionales Team aus Backend, Frontend und Design gemeinsam arbeitet. Ziel war es, die Software nicht nur optisch zu modernisieren, sondern sie für Nutzer spürbar einfacher bedienbar zu machen.
+      </p>
+
+      <div class="project-goals">
+        <div class="goal-item">
+          <div class="goal-bullet"></div>
+          <span><strong style="color:var(--cream)">Tailwind CSS</strong> implementieren und das bestehende CSS massiv verkleinern — weniger Overhead, mehr Konsistenz.</span>
+        </div>
+        <div class="goal-item">
+          <div class="goal-bullet"></div>
+          <span><strong style="color:var(--cream)">Visuelles Redesign</strong> — modernere Ästhetik, klarere Hierarchien und ein kohärentes Design System für das gesamte Produkt.</span>
+        </div>
+        <div class="goal-item">
+          <div class="goal-bullet"></div>
+          <span><strong style="color:var(--cream)">UX-Optimierung</strong> — komplexe Datenbankansichten vereinfachen und die Lernkurve für neue Nutzer reduzieren.</span>
+        </div>
+        <div class="goal-item">
+          <div class="goal-bullet"></div>
+          <span>Besonderer Fokus auf <strong style="color:var(--cream)">Responsive Darstellung</strong> — nahtlose Nutzung auf allen Gerätegrößen als Kernanforderung.</span>
+        </div>
+        <div class="goal-item">
+          <div class="goal-bullet"></div>
+          <span><strong style="color:var(--cream)">Cross-Team Kollaboration</strong> — enge Abstimmung zwischen Backend, Frontend und Design in einem größeren Entwicklungsteam.</span>
+        </div>
+      </div>
+
+      <div class="deliverables-grid">
+        <div class="deliverable">
+          <div class="deliverable-icon">⬡</div>
+          <div class="deliverable-name">UI Audit</div>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">◈</div>
+          <div class="deliverable-name">Design System</div>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">▭</div>
+          <div class="deliverable-name">Desktop UI</div>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">▯</div>
+          <div class="deliverable-name">Responsive</div>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">⟨/⟩</div>
+          <div class="deliverable-name">Tailwind CSS</div>
+        </div>
+        <div class="deliverable">
+          <div class="deliverable-icon">≡</div>
+          <div class="deliverable-name">Komponenten</div>
+        </div>
+      </div>
+
+      <div class="project-tags">
+        <span class="project-tag">Tailwind CSS</span>
+        <span class="project-tag">UI Redesign</span>
+        <span class="project-tag">Responsive Design</span>
+        <span class="project-tag">Design System</span>
+        <span class="project-tag">Complex Data UI</span>
+        <span class="project-tag">Cross-Team</span>
+        <span class="project-tag">UX Optimierung</span>
+      </div>
+    </div>
+  </div>
+  <!-- /PROJECT 02 -->
+
+  <!-- VISUAL PROOF -->
+  <div class="proof-wrap reveal">
+    <p class="proof-intro-label">// Arbeitsproben</p>
+    <h3 class="proof-heading">Vorher <em>vs.</em> Nachher</h3>
+
+    <!-- Full page comparison -->
+    <div class="proof-compare-group">
+      <p class="proof-group-label">Landing Page — Gesamtansicht</p>
+      <div class="proof-pair">
+        <div class="proof-item">
+          <div class="proof-badge proof-badge--before">Vorher</div>
+          <div class="proof-img-wrap">
+            <img src="webseite-alt-fr.png" alt="Alte Webseite FR" loading="lazy">
+          </div>
+          <p class="proof-caption">Alte Webseite · Organisch gewachsen · WordPress · 4 Jahre alt</p>
+        </div>
+        <div class="proof-divider-line">
+          <span class="proof-divider-arrow">→</span>
+        </div>
+        <div class="proof-item">
+          <div class="proof-badge proof-badge--after">Nachher</div>
+          <div class="proof-img-wrap">
+            <img src="neue-webseite-lp-google-fr.png" alt="Neue Webseite FR" loading="lazy">
+          </div>
+          <p class="proof-caption">Redesign · Tailwind CSS · Klare Struktur · Bessere Performance</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer detail comparison -->
+    <div class="proof-compare-group">
+      <p class="proof-group-label">Footer — Detailansicht</p>
+      <div class="proof-pair proof-pair--footer">
+        <div class="proof-item">
+          <div class="proof-badge proof-badge--before">Vorher</div>
+          <div class="proof-img-wrap proof-img-wrap--wide">
+            <img src="footer-alt.png" alt="Alter Footer" loading="lazy">
+          </div>
+          <p class="proof-caption">Alter Footer · Wolken-Illustration · Unstrukturiert · Heavy CSS</p>
+        </div>
+        <div class="proof-divider-line">
+          <span class="proof-divider-arrow">→</span>
+        </div>
+        <div class="proof-item">
+          <div class="proof-badge proof-badge--after">Nachher</div>
+          <div class="proof-img-wrap proof-img-wrap--wide">
+            <img src="footer-neu.png" alt="Neuer Footer" loading="lazy">
+          </div>
+          <p class="proof-caption">Neuer Footer · Dunkler Hintergrund · Klares Grid · CTA prominent</p>
+        </div>
+      </div>
+    </div>
+    <!-- Toolbox comparison -->
+    <div class="proof-compare-group">
+      <p class="proof-group-label">Toolbox — Domain Überblick</p>
+      <div class="proof-pair proof-pair--footer">
+        <div class="proof-item">
+          <div class="proof-badge proof-badge--before">Vorher</div>
+          <div class="proof-img-wrap proof-img-wrap--wide" style="max-height:420px;">
+            <img src="toolbox-alt.jpg" alt="Toolbox alt" loading="lazy">
+          </div>
+          <p class="proof-caption">Alte Toolbox · Schweres CSS · Dichte Darstellung · Veraltetes Layout</p>
+        </div>
+        <div class="proof-divider-line">
+          <span class="proof-divider-arrow">→</span>
+        </div>
+        <div class="proof-item">
+          <div class="proof-badge proof-badge--after">Nachher</div>
+          <div class="proof-img-wrap proof-img-wrap--wide" style="max-height:420px;">
+            <img src="toolbox-neu.png" alt="Toolbox neu" loading="lazy">
+          </div>
+          <p class="proof-caption">Neue Toolbox · Tailwind CSS · Klare Struktur · Moderne Navigation · Responsive</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /VISUAL PROOF -->
+
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-logo">Taja<span>(na)</span></div>
+  <span>UX/UI Design · Digital Strategy · 2025</span>
+  <span>Built with ♥ &amp; Attention to Detail</span>
+</footer>
+
+<!-- ── SCRIPTS ─────────────────────────────────────────────── -->
+<script>
+/* Cursor */
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function loop() {
+  rx += (mx - rx) * .18;
+  ry += (my - ry) * .18;
+  cur.style.left  = mx + 'px';
+  cur.style.top   = my + 'px';
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(loop);
+})();
+
+/* Nav shrink on scroll */
+const nav = document.getElementById('main-nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('shrunk', window.scrollY > 60);
+});
+
+/* Reveal on scroll */
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      // stagger siblings slightly
+      const siblings = [...entry.target.parentElement.querySelectorAll('.reveal')];
+      const idx = siblings.indexOf(entry.target);
+      entry.target.style.transitionDelay = (idx * 0.1) + 's';
+      entry.target.classList.add('visible');
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+revealEls.forEach(el => io.observe(el));
+
+/* Skill tags hover */
+document.querySelectorAll('.skill-tag').forEach(tag => {
+  tag.addEventListener('mouseenter', function(e) {
+    this.style.transition = 'all .18s cubic-bezier(.4,0,.2,1)';
+  });
+});
+
+/* Active nav highlight on scroll */
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+const scrollSpy = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + entry.target.id
+          ? 'var(--accent)' : 'var(--ink)';
+      });
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => scrollSpy.observe(s));
+</script>
+</body>
+</html>
